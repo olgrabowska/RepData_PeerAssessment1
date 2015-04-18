@@ -1,27 +1,24 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
 
-```{r}
+
+```r
 setwd("c:/Users/Ola/Desktop/Coursera/Reproductible_research/Project1")
 raw<-read.csv("activity.csv", header=T, na.strings="NA")
 raw$Date <- as.Date(raw$date, format="%Y-%m-%d")
-
 ```
 
 ## What is mean total number of steps taken per day?
-```{r readPackage, message=FALSE}
+
+```r
 #Reading the dplyr package 
 library(dplyr)
 ```
 
-```{r convertingData,fig.height=3}
+
+```r
 #and converting the dataset to dplyr dataframe.
 data<-tbl_df(raw)
 
@@ -33,29 +30,31 @@ summaryByDate<-summarize(groupByDay,StepsPerDay=sum(steps))
 with(summaryByDate, hist(StepsPerDay, main="Histogram of steps taken per day",
                          col="blue", xlab="Steps taken per day"))
 ```
-``` {r calculatingMeanAndMedianQuestion1}
+
+![](PA1_template_files/figure-html/convertingData-1.png) 
+
+```r
 #Calculating the mean and the median
 meanNumberOfSteps<-round(mean(summaryByDate$StepsPerDay, na.rm=T),2)
 medianNumberOfSteps<-round(median(summaryByDate$StepsPerDay, na.rm=T),2)
-
 ```
 
-**Mean** number of steps taken per day is `r meanNumberOfSteps`. The **median** is almost the same and equals `r medianNumberOfSteps`.
+**Mean** number of steps taken per day is 1.076619\times 10^{4}. The **median** is almost the same and equals 1.0765\times 10^{4}.
 
-```{r removingUnnecessaryQuestion1, echo=FALSE}
-rm(groupByDay, summaryByDate, meanNumberOfSteps,medianNumberOfSteps)
-```
+
 
 
 
 ## What is the average daily activity pattern?
-``` {r summarizingDataQuestion2}
+
+```r
 #Calculating the table summarizing the data by day
 dataWoNa<-filter(data, is.na(steps)==FALSE)
 groupByInterval<-group_by(dataWoNa,interval)
 summaryByInterval<-summarize(groupByInterval,MeanIntervalByDay=mean(steps))
 ```
-```{r plottingQuestion2, fig.height=3}
+
+```r
 with(summaryByInterval, plot(interval, MeanIntervalByDay, type="l", main="Average daily activity pattern", xlab="Intervals", ylab="Average steps per day"))
 
 maxNumberOfSteps<-max(summaryByInterval$MeanIntervalByDay)
@@ -67,27 +66,29 @@ abline(h=maxAvgSteps, col="blue", lty=3)
 text(1200,180, paste("Max=" , maxAvgSteps), col="blue")
 ```
 
-The interval which on average across all the days in the dataset, contains the maximum number of step is `r intervalWithMaxSteps`.
+![](PA1_template_files/figure-html/plottingQuestion2-1.png) 
 
-```{r removeUnnecessary2, echo=FALSE}
-rm(dataWoNa, groupByInterval,summaryByInterval,maxNumberOfSteps,  intervalWithMaxSteps, maxAvgSteps)
-```
+The interval which on average across all the days in the dataset, contains the maximum number of step is 835.
+
+
 
 
 ## Imputing missing values
-```{r calculatingNA}
+
+```r
 dataNa<-filter(data, is.na(steps)==TRUE)
 naNumber<-as.integer(summarize(dataNa,  count = n())[1])
 ```
-Number of missing values equals `r naNumber`.
-```{r inputtingMissingValues}
+Number of missing values equals 2304.
+
+```r
 groupByInterval<-group_by(data,interval)
 summaryByInterval<-summarize(groupByInterval,intervalAverage=mean(steps,na.rm=T))
 dataAll <- merge(data, summaryByInterval, by.x="interval", by.y="interval")
 dataAll<-mutate(dataAll, stepsInputted=ifelse(is.na(steps)==T,intervalAverage,steps))
-
 ```
-```{r summarizingDataQuestion3, fig.height=3}
+
+```r
 #converting the dataset to dplyr dataframe.
 dataAll<-tbl_df(dataAll)
 
@@ -100,13 +101,15 @@ with(summaryByDate, hist(StepsPerDay, main="Histogram of steps taken per day",
                          col="blue", xlab="Steps taken per day"))
 ```
 
-``` {r calculatingMeanAndMedianQuestion3}
+![](PA1_template_files/figure-html/summarizingDataQuestion3-1.png) 
+
+
+```r
 #Calculating the mean and the median
 meanNumberOfSteps<-round(mean(summaryByDate$StepsPerDay),2)
 medianNumberOfSteps<-round(median(summaryByDate$StepsPerDay),2)
-
 ```
-**Mean** number of steps taken per day is `r meanNumberOfSteps`. The **median** is the same and equals `r medianNumberOfSteps`.
+**Mean** number of steps taken per day is 1.076619\times 10^{4}. The **median** is almost the same and equals 1.076619\times 10^{4}.
 
 
 
