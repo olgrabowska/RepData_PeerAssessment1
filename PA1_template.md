@@ -13,8 +13,9 @@ raw$Date <- as.Date(raw$date, format="%Y-%m-%d")
 ## What is mean total number of steps taken per day?
 
 ```r
-#Reading the dplyr package 
+#Reading the dplyr and lattice package 
 library(dplyr)
+library(lattice)
 ```
 
 
@@ -82,6 +83,8 @@ naNumber<-as.integer(summarize(dataNa,  count = n())[1])
 Number of missing values equals 2304.
 
 ```r
+#To input missing values a mean from the given interval was used.
+
 groupByInterval<-group_by(data,interval)
 summaryByInterval<-summarize(groupByInterval,intervalAverage=mean(steps,na.rm=T))
 dataAll <- merge(data, summaryByInterval, by.x="interval", by.y="interval")
@@ -94,10 +97,10 @@ dataAll<-tbl_df(dataAll)
 
 #Calculating the table summarizing the data by day
 groupByDay<-group_by(dataAll,Date)
-summaryByDate<-summarize(groupByDay,StepsPerDay=sum(stepsInputted))
+summaryByDate<-summarize(groupByDay,inputtedStepsPerDay=sum(stepsInputted))
 
 #Plotting the histogram
-with(summaryByDate, hist(StepsPerDay, main="Histogram of steps taken per day",
+with(summaryByDate, hist(inputtedStepsPerDay, main="Histogram of steps taken per day",
                          col="blue", xlab="Steps taken per day"))
 ```
 
@@ -106,11 +109,40 @@ with(summaryByDate, hist(StepsPerDay, main="Histogram of steps taken per day",
 
 ```r
 #Calculating the mean and the median
-meanNumberOfSteps<-round(mean(summaryByDate$StepsPerDay),2)
-medianNumberOfSteps<-round(median(summaryByDate$StepsPerDay),2)
+meanInputtedSteps<-round(mean(summaryByDate$inputtedStepsPerDay),2)
+medianInputtedSteps<-round(median(summaryByDate$inputtedStepsPerDay),2)
 ```
-**Mean** number of steps taken per day is 1.076619\times 10^{4}. The **median** is almost the same and equals 1.076619\times 10^{4}.
+**Mean** number of steps taken per day is 1.076619\times 10^{4}. The **median** is the same and equals 1.076619\times 10^{4}.
 
 
+```r
+rm(groupByDay, groupByInterval, summaryByDate, summaryByInterval)
+```
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+```r
+Sys.setlocale("LC_ALL","C")
+```
+
+```
+## [1] "C"
+```
+
+```r
+dataAll$Weekdays<-weekdays(dataAll$Date)
+dataAll<-mutate(dataAll, Weekends=ifelse(Weekdays=="Saturday"|Weekdays=="Sunday","weekend","weekday"))
+
+#summarizing data for the chart
+groupedByInterval<-group_by(dataAll, interval, Weekends)
+summaryByInterval<-summarize(groupedByInterval, averageInputtedSteps=mean(stepsInputted))
+```
+
+```r
+chart<-xyplot(averageInputtedSteps ~ interval | Weekends, data=summaryByInterval, 
+              layout=c(1,2), type="l", xlab="Interval", ylab="Number of steps",
+                  )
+print(chart) 
+```
+
+![](PA1_template_files/figure-html/chartQuestion4-1.png) 
